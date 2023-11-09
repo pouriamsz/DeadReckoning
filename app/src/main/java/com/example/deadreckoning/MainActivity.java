@@ -26,11 +26,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button btnStart, btnStop;
 
     // variables
-    float alpha = 0.8f;
+    float alpha = 0.97f;
     double height = 1.65;
     double stepLength = 0.5;
     boolean registered = false;
     Point current = new Point(0,0);
+    int ignoreCnt = 0;
 
     // check first steps - noise cancelling
     int firstCheck = 0;
@@ -214,17 +215,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             I= new float[9];
             SensorManager.getRotationMatrix(Rot, I, accels, mags);
 
-            // Correct if screen is in Landscape
-            float[] outR = new float[9];
-            SensorManager.remapCoordinateSystem(Rot, SensorManager.AXIS_X,SensorManager.AXIS_Z, outR);
             SensorManager.getOrientation(Rot, values);
 
             // here we calculated the final yaw(azimuth), roll & pitch of the device.
             // multiplied by a global standard value to get accurate results
 
             // this is the yaw or the azimuth we need
-//            modifyYaw(values[0]);
-            yaw = (float)Math.toDegrees(values[0]);
+            modifyYaw(values[0]);
             pitch = (float)Math.toDegrees(values[1]);
             roll = (float)Math.toDegrees(values[2]);
 
@@ -259,10 +256,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
             yaw = yaw/yaws.size();
-            if (Math.abs(yaw - (float)Math.toDegrees(value) )>20 &&
-                    Math.abs(yaw - (float)Math.toDegrees(value) )<35){
+            if (ignoreCnt<=5 && Math.abs(yaw - (float)Math.toDegrees(value) )>20) {
+                ignoreCnt++;
+            }else if (ignoreCnt > 5){
+                ignoreCnt = 0;
                 yaws.remove(0);
-                yaws.add(yaw);
+                yaws.add((float)Math.toDegrees(value));
                 yaw = 0;
                 for (int i = 0; i < yaws.size(); i++) {
                     if ( yaws.get(i)<-170 || yaws.get(i)>170) {
