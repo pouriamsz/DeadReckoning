@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView txtSteps;
     private EditText edtHeight;
     private Button btnStart, btnStop;
+    RadioButton rMale, rFemale;
+    boolean male = true;
 
     // variables
     float alpha = 0.97f;
@@ -68,11 +71,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         edtHeight = findViewById(R.id.edtHeight);
         btnStart = findViewById(R.id.btnStart);
         btnStop = findViewById(R.id.btnStop);
+        rMale = findViewById(R.id.radioMale);
+        rFemale = findViewById(R.id.radioFemale);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        rMale.setOnCheckedChangeListener((buttonView, isChecked) -> male = isChecked);
+
+        rFemale.setOnCheckedChangeListener((buttonView, isChecked) -> male = !isChecked);
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,16 +130,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
-    public static double calculateStrideLength(double heightInMeter) {
-        double minHeightPercentage = 0.45; // 45% of height
-        double maxHeightPercentage = 0.55; // 55% of height
+    public double calculateStrideLength(double heightInMeter) {
+        double heightPercentage = 0.3;
+        if (male){
+            heightPercentage = 0.3;
+        }else{
+            heightPercentage = 0.28;
+        }
 
-        double minStrideLength = heightInMeter * minHeightPercentage;
-        double maxStrideLength = heightInMeter * maxHeightPercentage;
+        double strideLength = heightInMeter * heightPercentage;
 
-        // Calculate average stride length using the range
-        double averageStrideLength = (minStrideLength + maxStrideLength) / 2;
-        return averageStrideLength;
+        return strideLength;
     }
 
     @Override

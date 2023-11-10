@@ -20,13 +20,29 @@
             android:text=""
             android:hint="Height "/>
 
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RadioButton android:id="@+id/radioMale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Male"/>
+            <RadioButton android:id="@+id/radioFemale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Female"/>
+        </RadioGroup>
+
+    </LinearLayout>
+
         <Button
             android:id="@+id/btnStart"
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_gravity="bottom"
             android:text="Start"
-            android:layout_marginRight="5dp"
+            android:layout_marginLeft="10dp"
             android:textAllCaps="false"/>
 
         <Button
@@ -35,10 +51,10 @@
             android:layout_height="50dp"
             android:layout_gravity="bottom"
             android:text="Stop"
+            android:layout_marginLeft="10dp"
             android:textAllCaps="false"/>
 
 
-    </LinearLayout>
 
     <TextView
         android:id="@+id/txtSteps"
