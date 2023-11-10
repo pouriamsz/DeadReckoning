@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     boolean male = true;
 
     // variables
-    float alpha = 0.97f;
+    float alpha = 0.97f; //TODO
     double height = 1.65;
     double stepLength = 0.5;
     boolean registered = false;
