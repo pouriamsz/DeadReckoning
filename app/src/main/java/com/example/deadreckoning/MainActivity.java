@@ -55,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private ArrayList<Float> yaws = new ArrayList<>();
     private float pitch;
     private float roll;
-    private Sensor rotationSensor;
-
+    private Sensor rotationSensor, gyroscopeSensor;
+    float gyroY = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
+        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             sensorManager.registerListener(this, magneticField,
                     SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
         }
+        if (gyroscopeSensor!=null){
+            sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
         registered = true;
     }
 
@@ -149,65 +154,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             return;
         }
 
-        switch (event.sensor.getType())
-        {
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                if (mags == null) {
-                    mags = event.values.clone();
-                    break;
-                }
-                mags[0] = alpha*mags[0] + (1-alpha)*event.values[0];
-                mags[1] = alpha*mags[1] + (1-alpha)*event.values[1];
-                mags[2] = alpha*mags[2] + (1-alpha)*event.values[2];
+        gyroscope(event);
+        getSensorData(event);
+        rotation();
+        stepDetector(event);
+    }
 
-                break;
-            case Sensor.TYPE_ACCELEROMETER:
-                if (accels == null) {
-                    accels = event.values.clone();
-                    break;
-                }
-                accels[0] = alpha*accels[0] + (1-alpha)*event.values[0];
-                accels[1] = alpha*accels[1] + (1-alpha)*event.values[1];
-                accels[2] = alpha*accels[2] + (1-alpha)*event.values[2];
-                break;
+    private void gyroscope(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE){
+            float rotationX = event.values[0];
+            gyroY = event.values[1];
+            float rotationZ = event.values[2];
+//            txtSteps.setText( "Yaw = " + yaw+"\n"+
+//                    "steps = " + stepCount + "\n"+
+//                    "gyro x = " + rotationX + "\n" +
+//                    "gyro y = " + rotationY + "\n" +
+//                    "gyro z = " + rotationZ + "\n"
+//            );
         }
 
-        // Step
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            accelerometerData[0] = event.values[0];
-            accelerometerData[1] = event.values[1];
-            accelerometerData[2] = event.values[2];
+    }
 
-
-            // Calculate magnitude of combined sensor data
-            double magnitude = Math.sqrt(
-                    accelerometerData[0] * accelerometerData[0] +
-                            accelerometerData[1] * accelerometerData[1] +
-                            accelerometerData[2] * accelerometerData[2]
-            );
-
-
-            txtSteps.setText( "Yaw = " + yaw+"\n"+
-                            "mag = " + magnitude +"\n"+
-                    "steps = " + stepCount + "\n"+
-                    "cx = "+  current.getX() + "\n"+
-                    "cy = " + current.getY());
-
-            // Detect peaks
-            if (magnitude > STEP_THRESHOLD && !isPeak) {
-                // Detected a peak (potential step)
-                isPeak = true;
-            } else if (magnitude < MIN_STEP_THRESHOLD && isPeak) {
-                // Step has ended
-                isPeak = false;
-                // Increment step count here
-                stepCount++;
-                // update current
-                updateCurrent();
-
-            }
-        }
-
+    private void rotation() {
         // Rotation
         if (mags != null && accels != null) {
 
@@ -229,7 +197,69 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mags = null;
             accels = null;
         }
+    }
 
+    private void stepDetector(SensorEvent event) {
+        // Step
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+
+            // Calculate magnitude of combined sensor data
+            double magnitude = Math.sqrt(
+                    accelerometerData[0] * accelerometerData[0] +
+                            accelerometerData[1] * accelerometerData[1] +
+                            accelerometerData[2] * accelerometerData[2]
+            );
+
+
+            txtSteps.setText( "Yaw = " + yaw+"\n"+
+                    "mag = " + magnitude +"\n"+
+                    "steps = " + stepCount + "\n"+
+                    "cx = "+  current.getX() + "\n"+
+                    "cy = " + current.getY());
+
+            // Detect peaks
+            if (magnitude > STEP_THRESHOLD && !isPeak) {
+                // Detected a peak (potential step)
+                isPeak = true;
+            } else if (magnitude < MIN_STEP_THRESHOLD && isPeak) {
+                // Step has ended
+                isPeak = false;
+                // Increment step count here
+                stepCount++;
+                // update current
+                updateCurrent();
+
+            }
+        }
+    }
+
+    private void getSensorData(SensorEvent event) {
+        switch (event.sensor.getType())
+        {
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                if (mags == null) {
+                    mags = event.values.clone();
+                    break;
+                }
+                mags[0] = alpha*mags[0] + (1-alpha)*event.values[0];
+                mags[1] = alpha*mags[1] + (1-alpha)*event.values[1];
+                mags[2] = alpha*mags[2] + (1-alpha)*event.values[2];
+
+                break;
+            case Sensor.TYPE_ACCELEROMETER:
+                accelerometerData[0] = event.values[0];
+                accelerometerData[1] = event.values[1];
+                accelerometerData[2] = event.values[2];
+
+                if (accels == null) {
+                    accels = event.values.clone();
+                    break;
+                }
+                accels[0] = alpha*accels[0] + (1-alpha)*event.values[0];
+                accels[1] = alpha*accels[1] + (1-alpha)*event.values[1];
+                accels[2] = alpha*accels[2] + (1-alpha)*event.values[2];
+                break;
+        }
     }
 
     private void updateCurrent() {
@@ -239,6 +269,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private void modifyYaw(float value) {
+        if (Math.abs(gyroY)>0.5){
+            yaws = new ArrayList<>();
+            ignoreCnt = 0;
+        }
         if (yaws.size()==0){
             yaw = (float)Math.toDegrees(value);
             yaws.add(yaw);
@@ -256,10 +290,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
             yaw = yaw/yaws.size();
-            if (ignoreCnt<=5 && Math.abs(yaw - (float)Math.toDegrees(value) )>20) {
+            if (ignoreCnt<=5 && Math.abs(yaw - (float)Math.toDegrees(value) )>10) { //TODO
                 ignoreCnt++;
-            }else if (ignoreCnt > 5){
-                ignoreCnt = 0;
+            }else if (ignoreCnt > 5){ // TODO
+                ignoreCnt -= 2; // TODO
                 yaws.remove(0);
                 yaws.add((float)Math.toDegrees(value));
                 yaw = 0;
@@ -276,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 yaw = yaw/yaws.size();
             }else{
-                if (yaws.size()>5){
+                if (yaws.size()>5){ //TODO
                     yaws.remove(0);
                 }
                 yaws.add((float)Math.toDegrees(value));
