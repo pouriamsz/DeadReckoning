@@ -243,11 +243,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             );
 
 
-//            txtSteps.setText( "Yaw = " + yaw+"\n"+
-//                    "mag = " + magnitude +"\n"+
-//                    "steps = " + stepCount + "\n"+
-//                    "cx = "+  current.getX() + "\n"+
-//                    "cy = " + current.getY());
+            txtSteps.setText( "Yaw = " + yaw+"\n"+
+                    "mag = " + magnitude +"\n"+
+                    "steps = " + stepCount + "\n"+
+                    "cx = "+  current.getX() + "\n"+
+                    "cy = " + current.getY());
 
             // Detect peaks
             if (magnitude > STEP_THRESHOLD && !isPeak) {
@@ -294,6 +294,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private void modifyYaw(float value) {
+        if (yaws.size() > 3 && Math.abs(gyroY) < 0.2){ // TODO
+            return;
+        }
         if (Math.abs(gyroY)>0.5){
             yaws = new ArrayList<>();
             ignoreCnt = 0;
