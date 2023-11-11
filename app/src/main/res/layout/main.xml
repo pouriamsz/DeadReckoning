@@ -27,7 +27,8 @@
             <RadioButton android:id="@+id/radioMale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Male"/>
+                android:text="Male"
+                android:checked="true"/>
             <RadioButton android:id="@+id/radioFemale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -45,16 +46,33 @@
             android:layout_marginLeft="10dp"
             android:textAllCaps="false"/>
 
-        <Button
-            android:id="@+id/btnStop"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:layout_gravity="bottom"
-            android:text="Stop"
-            android:layout_marginLeft="10dp"
-            android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/btnSetAzimuth"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="10dp"
+        android:text="Set Azimuth"
+        android:textAllCaps="false" />
 
+    <Button
+        android:id="@+id/btnReset"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="10dp"
+        android:text="Reset"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnStop"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="10dp"
+        android:text="Stop"
+        android:textAllCaps="false" />
 
     <TextView
         android:id="@+id/txtSteps"

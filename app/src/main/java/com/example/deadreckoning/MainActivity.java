@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // UI
     TextView txtSteps;
     private EditText edtHeight;
-    private Button btnStart, btnStop;
+    private Button btnStart, btnStop, btnSetAzimuth, btnReset;
     RadioButton rMale, rFemale;
     boolean male = true;
 
@@ -72,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         edtHeight = findViewById(R.id.edtHeight);
         btnStart = findViewById(R.id.btnStart);
         btnStop = findViewById(R.id.btnStop);
+        btnSetAzimuth = findViewById(R.id.btnSetAzimuth);
+        btnReset = findViewById(R.id.btnReset);
         rMale = findViewById(R.id.radioMale);
         rFemale = findViewById(R.id.radioFemale);
 
@@ -83,6 +85,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         rMale.setOnCheckedChangeListener((buttonView, isChecked) -> male = isChecked);
 
         rFemale.setOnCheckedChangeListener((buttonView, isChecked) -> male = !isChecked);
+
+        btnReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stepCount = 0;
+                current.setX(0.0);
+                current.setY(0.0);
+            }
+        });
+
+        btnSetAzimuth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                originYaw = yaw;
+            }
+        });
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
