@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     .atan2((outR[1] - outR[3]), (outR[0] + outR[4])));
 
             // this is the yaw or the azimuth we need
-            modifyYaw((float) Math.toRadians(mAzimuthAngleNotFlat));
+            modifyYaw((float)mAzimuthAngleNotFlat);
             pitch = (float)Math.toDegrees(values[1]);
             roll = (float)Math.toDegrees(values[2]);
 
@@ -302,57 +302,33 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             ignoreCnt = 0;
         }
         if (yaws.size()==0){
-            yaw = (float)Math.toDegrees(value);
+            yaw = value;
             yaws.add(yaw);
         }else{
             yaw = 0;
             for (int i = 0; i < yaws.size(); i++) {
-                if ( yaws.get(i)<-170 || yaws.get(i)>170) {
-                    if (yaws.get(0)>0){
-                        yaw += Math.abs(yaws.get(i));
-                    }else{
-                        yaw += -Math.abs(yaws.get(i));
-                    }
-                }else{
                     yaw += yaws.get(i);
-                }
             }
             yaw = yaw/yaws.size();
-            if (ignoreCnt<=5 && Math.abs(yaw - (float)Math.toDegrees(value) )>5 && gyroY<0.5) { //TODO
+            if (ignoreCnt<=5 && Math.abs(yaw - value )>10 && gyroY<0.2) { //TODO
                 ignoreCnt++;
             }else if (ignoreCnt > 5){ // TODO
-                ignoreCnt -=2; // TODO
+                ignoreCnt--; // TODO
                 yaws.remove(0);
-                yaws.add((float)Math.toDegrees(value));
+                yaws.add(value);
                 yaw = 0;
                 for (int i = 0; i < yaws.size(); i++) {
-                    if ( yaws.get(i)<-170 || yaws.get(i)>170) {
-                        if (yaws.get(0)>0){
-                            yaw += Math.abs(yaws.get(i));
-                        }else{
-                            yaw += -Math.abs(yaws.get(i));
-                        }
-                    }else{
                         yaw += yaws.get(i);
-                    }
                 }
                 yaw = yaw/yaws.size();
             }else{
                 if (yaws.size()>5){ //TODO
                     yaws.remove(0);
                 }
-                yaws.add((float)Math.toDegrees(value));
+                yaws.add(value);
                 yaw = 0;
                 for (int i = 0; i < yaws.size(); i++) {
-                    if ( yaws.get(i)<-170 || yaws.get(i)>170) {
-                        if (yaws.get(0)>0){
-                            yaw += Math.abs(yaws.get(i));
-                        }else{
-                            yaw += -Math.abs(yaws.get(i));
-                        }
-                    }else{
                         yaw += yaws.get(i);
-                    }
                 }
                 yaw /= yaws.size();
             }
