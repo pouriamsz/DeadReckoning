@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     boolean male = true;
 
     // variables
-    float alpha = 0.97f; //TODO
+    float alpha = 0.8f; //TODO
     double height = 1.65;
     double stepLength = 0.5;
     boolean registered = false;
@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometerSensor;
     private float[] accelerometerData = new float[3];
-    private static final double MIN_STEP_THRESHOLD = 9.4; //9.5 Minimum value for peak detection
-    private static final double STEP_THRESHOLD = 10.5; // Threshold for peak detection
+    private static final double MIN_STEP_THRESHOLD = 9.6; //TODO: 9.4 // Minimum value for peak detection
+    private static final double STEP_THRESHOLD = 10.7; //TODO: 10.5 // Threshold for peak detection
     private boolean isPeak = false;
     int stepCount = 0;
 
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float I[] = null; //for magnetic rotational data
     private float accels[] = new float[3];
     private float mags[] = new float[3];
+    boolean getAccels = false, getMags = false;
     private float[] values = new float[3];
     private float yaw, originYaw = 85; // TODO
     private ArrayList<Float> yaws = new ArrayList<>();
@@ -187,25 +188,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void rotation() {
         // Rotation
-        if (mags != null && accels != null) {
+        if (getMags && getAccels) {
 
             Rot = new float[9];
             I= new float[9];
             SensorManager.getRotationMatrix(Rot, I, accels, mags);
-
-            SensorManager.getOrientation(Rot, values);
+            float[] outR = new float[9];
+            SensorManager.remapCoordinateSystem(Rot, SensorManager.AXIS_X,SensorManager.AXIS_Z, outR);
+            SensorManager.getOrientation(outR, values);
 
             // here we calculated the final yaw(azimuth), roll & pitch of the device.
             // multiplied by a global standard value to get accurate results
 
+            double mAzimuthAngleNotFlat = Math.toDegrees(Math
+                    .atan2((outR[1] - outR[3]), (outR[0] + outR[4])));
+
             // this is the yaw or the azimuth we need
-            modifyYaw(values[0]);
+            modifyYaw((float) Math.toRadians(mAzimuthAngleNotFlat));
             pitch = (float)Math.toDegrees(values[1]);
             roll = (float)Math.toDegrees(values[2]);
 
-            //retrigger the loop when things are repopulated
-            mags = null;
-            accels = null;
+            getAccels = false;
+            getMags = false;
         }
     }
 
@@ -221,11 +225,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             );
 
 
-            txtSteps.setText( "Yaw = " + yaw+"\n"+
-                    "mag = " + magnitude +"\n"+
-                    "steps = " + stepCount + "\n"+
-                    "cx = "+  current.getX() + "\n"+
-                    "cy = " + current.getY());
+//            txtSteps.setText( "Yaw = " + yaw+"\n"+
+//                    "mag = " + magnitude +"\n"+
+//                    "steps = " + stepCount + "\n"+
+//                    "cx = "+  current.getX() + "\n"+
+//                    "cy = " + current.getY());
 
             // Detect peaks
             if (magnitude > STEP_THRESHOLD && !isPeak) {
@@ -247,27 +251,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (event.sensor.getType())
         {
             case Sensor.TYPE_MAGNETIC_FIELD:
-                if (mags == null) {
-                    mags = event.values.clone();
-                    break;
-                }
                 mags[0] = alpha*mags[0] + (1-alpha)*event.values[0];
                 mags[1] = alpha*mags[1] + (1-alpha)*event.values[1];
                 mags[2] = alpha*mags[2] + (1-alpha)*event.values[2];
-
+                getMags = true;
                 break;
             case Sensor.TYPE_ACCELEROMETER:
                 accelerometerData[0] = event.values[0];
                 accelerometerData[1] = event.values[1];
                 accelerometerData[2] = event.values[2];
 
-                if (accels == null) {
-                    accels = event.values.clone();
-                    break;
-                }
                 accels[0] = alpha*accels[0] + (1-alpha)*event.values[0];
                 accels[1] = alpha*accels[1] + (1-alpha)*event.values[1];
                 accels[2] = alpha*accels[2] + (1-alpha)*event.values[2];
+                getAccels = true;
                 break;
         }
     }
@@ -300,10 +297,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
             yaw = yaw/yaws.size();
-            if (ignoreCnt<=5 && Math.abs(yaw - (float)Math.toDegrees(value) )>10) { //TODO
+            if (ignoreCnt<=5 && Math.abs(yaw - (float)Math.toDegrees(value) )>5 && gyroY<0.5) { //TODO
                 ignoreCnt++;
             }else if (ignoreCnt > 5){ // TODO
-                ignoreCnt -= 2; // TODO
+                ignoreCnt -=2; // TODO
                 yaws.remove(0);
                 yaws.add((float)Math.toDegrees(value));
                 yaw = 0;
