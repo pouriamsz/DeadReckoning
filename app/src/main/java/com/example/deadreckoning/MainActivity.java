@@ -221,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             double mAzimuthAngleNotFlat = Math.toDegrees(Math
                     .atan2((outR[1] - outR[3]), (outR[0] + outR[4])));
 
+            mAzimuthAngleNotFlat += 180;
             // this is the yaw or the azimuth we need
             modifyYaw((float)mAzimuthAngleNotFlat);
             pitch = (float)Math.toDegrees(values[1]);
