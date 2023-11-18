@@ -302,6 +302,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             yaws = new ArrayList<>();
             ignoreCnt = 0;
         }
+        if ((yaw > 340 && value < 20) || (yaw<20 && value>340)){
+            yaws = new ArrayList<>();
+        }
         if (yaws.size()==0){
             yaw = value;
             yaws.add(yaw);
