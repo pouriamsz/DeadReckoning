@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private void modifyYaw(float value) {
-        if (yaws.size() >= 5 && Math.abs(gyroY) < 0.2){ // TODO
+        if (yaws.size() >= 5 && Math.abs(gyroY) < 0.05){ // TODO
             return;
         }
         if (Math.abs(gyroY)>0.5){
@@ -314,7 +314,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     yaw += yaws.get(i);
             }
             yaw = yaw/yaws.size();
-            if (ignoreCnt<=5 && Math.abs(yaw - value )>10 && gyroY<0.2) { //TODO
+            if (ignoreCnt<=5 && Math.abs(yaw - value )>10 && gyroY<0.1) { //TODO
                 ignoreCnt++;
             }else if (ignoreCnt > 5){ // TODO
                 ignoreCnt--; // TODO
