@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     double stepLength = 0.5;
     boolean registered = false;
     Point current = new Point(0,0);
-    int ignoreCnt = 0;
+    int ignoreCnt = 0, gyroNotChangingCnt = 0;
 
     // check first steps - noise cancelling
     int firstCheck = 0;
@@ -295,12 +295,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private void modifyYaw(float value) {
-        if (yaws.size() >= 5 && Math.abs(gyroY) < 0.05){ // TODO
+        if (yaws.size() >= 3 && Math.abs(gyroY) < 0.05){ // TODO
+            if (gyroNotChangingCnt >= 15){
+                return;
+            }
+            yaw = 0;
+            for (int i = 0; i < yaws.size(); i++) {
+                yaw += yaws.get(i);
+            }
+            yaw = yaw/yaws.size();
+            if (ignoreCnt<=5 && Math.abs(yaw - value )>10 && gyroY<0.1) { //TODO
+                ignoreCnt++;
+            }else if (ignoreCnt > 5){ // TODO
+                ignoreCnt--; // TODO
+                yaws.remove(0);
+                yaws.add(value);
+                yaw = 0;
+                for (int i = 0; i < yaws.size(); i++) {
+                    yaw += yaws.get(i);
+                }
+                yaw = yaw/yaws.size();
+            }else{
+                if (yaws.size()>3){ //TODO
+                    yaws.remove(0);
+                }
+                yaws.add(value);
+                yaw = 0;
+                for (int i = 0; i < yaws.size(); i++) {
+                    yaw += yaws.get(i);
+                }
+                yaw /= yaws.size();
+            }
+            gyroNotChangingCnt++;
             return;
         }
         if (Math.abs(gyroY)>0.5){
             yaws = new ArrayList<>();
             ignoreCnt = 0;
+            gyroNotChangingCnt=0;
         }
         if ((yaw > 340 && value < 20) || (yaw<20 && value>340)){
             yaws = new ArrayList<>();
@@ -326,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 yaw = yaw/yaws.size();
             }else{
-                if (yaws.size()>5){ //TODO
+                if (yaws.size()>3){ //TODO
                     yaws.remove(0);
                 }
                 yaws.add(value);
